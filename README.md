@@ -1,17 +1,21 @@
-# protobench
-To download:
+# How to use this to benchmark protobuf:
+# To download:
 jeffjiang@jeffjiang2:~$ git clone https://github.com/guokeno0/protobench.git
 
-To compile:
+#To compile:
 jeffjiang@jeffjiang2:~$ cd protobench/
+
 jeffjiang@jeffjiang2:~/protobench$ make
+
 export GOPATH=`pwd`; \
         go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 protoc --go_out=./src/queryresult/ ./proto/queryresult.proto
 export GOPATH=`pwd`; \
         go install cmdbench; \
         mv bin/cmdbench bin/bench
+
 jeffjiang@jeffjiang2:~/protobench$ ./bin/bench --help
+
 Usage of ./bin/bench:
   -count=100000: total counts for serialization/deserialization
   -cpuprofile="pprof": write cpu profile to file
@@ -19,7 +23,7 @@ Usage of ./bin/bench:
   -format="vtbuf": serialization format: vtbuf, proto
   -threads=1: number of threads
 
-To run the benchmark:
+# To run the benchmark:
 # Test protobuf
 jeffjiang@jeffjiang2:~/protobench$ ./bin/bench -count=1000000 -format="proto" -threads=4
 
