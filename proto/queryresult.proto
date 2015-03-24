@@ -1,0 +1,54 @@
+syntax = "proto2";
+
+package queryresult;
+
+message Cell {
+  optional bytes value = 1;
+}
+
+message Row {
+  repeated Cell values = 1;
+}
+
+message Field {
+  optional string name = 1;
+  // Type follows enum_field_types from mysql.h.
+  enum Type {
+    TYPE_DECIMAL = 0;
+    TYPE_TINY = 1;
+    TYPE_SHORT = 2;
+    TYPE_LONG = 3;
+    TYPE_FLOAT = 4;
+    TYPE_DOUBLE = 5;
+    TYPE_NULL = 6;
+    TYPE_TIMESTAMP = 7;
+    TYPE_LONGLONG = 8;
+    TYPE_INT24 = 9;
+    TYPE_DATE = 10;
+    TYPE_TIME = 11;
+    TYPE_DATETIME = 12;
+    TYPE_YEAR = 13;
+    TYPE_NEWDATE = 14;
+    TYPE_VARCHAR = 15;
+    TYPE_BIT = 16;
+    TYPE_NEWDECIMAL = 246;
+    TYPE_ENUM = 247;
+    TYPE_SET = 248;
+    TYPE_TINY_BLOB = 249;
+    TYPE_MEDIUM_BLOB = 250;
+    TYPE_LONG_BLOB = 251;
+    TYPE_BLOB = 252;
+    TYPE_VAR_STRING = 253;
+    TYPE_STRING = 254;
+    TYPE_GEOMETRY = 255;
+  }
+  optional Type type = 2;
+}
+
+message QueryResult {
+  repeated Field fields = 1;
+  optional uint64 rows_affected = 2;
+  optional uint64 insert_id = 3;
+  repeated Row rows = 4;
+}
+
