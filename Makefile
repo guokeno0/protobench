@@ -1,12 +1,12 @@
-all: dep proto bench
+all: dep bench
 
 dep:
 	go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 
-proto:
-	protoc --go_out=./src/ ./proto/*.proto
+protodef:
+	protoc --go_out=./src/queryresult/ ./proto/queryresult.proto
 
-bench:
-	go install vtbuf
-	mv bin/vtbuf bin/bench
+bench: protodef
+	go install cmdbench
+	mv bin/cmdbench bin/bench
 

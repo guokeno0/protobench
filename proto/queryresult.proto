@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package queryresult;
+package proto;
 
 message Cell {
   optional bytes value = 1;
