@@ -19,23 +19,32 @@ var (
 	threads    = flag.Int("threads", 1, "number of threads")
 	debug      = flag.Bool("debug", false, "debug mode")
 	count      = flag.Int("count", 100000, "total counts for serialization/deserialization")
-	format     = flag.String("format", "vtbuf", "serialization format: vtbuf, proto")
+	format     = flag.String("format", "vtbuf", "serialization format: vtbuf, proto, directproto")
 )
 
 func benchmark() {
 	qr := queryresult.QueryResult{}
+	qrpb := querypb.QueryResult{}
 	for i := 0; i < 30; i++ {
 		columnName := fmt.Sprintf("column-%d", i)
 		qr.Fields = append(qr.Fields, queryresult.Field{Name: columnName, Type: 0})
+		qrpb.Fields = append(qrpb.Fields, &querypb.Field{Name: proto.String(columnName), Type: querypb.Field_TYPE_STRING.Enum()})
 	}
 	qr.Rows = make([][]queryresult.Value, 3, 3)
+	qrpb.Rows = make([]*querypb.Row, 3, 3)
+	for i, _ := range qrpb.Rows {
+		qrpb.Rows[i] = &querypb.Row{}
+	}
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 30; j++ {
 			qr.Rows[i] = append(qr.Rows[i], queryresult.MakeString([]byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")))
+			qrpb.Rows[i].Values = append(qrpb.Rows[i].Values, &querypb.Cell{Value: []byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")})
 		}
 	}
 	qr.RowsAffected = 3
 	qr.InsertId = 101
+	qrpb.RowsAffected = proto.Uint64(3)
+	qrpb.InsertId = proto.Uint64(101)
 	begin := time.Now()
 	for i := 0; i < *count; i++ {
 		switch *format {
@@ -56,6 +65,13 @@ func benchmark() {
 			queryresult.ProtoToQueryResult(&qrpb, &protoqr)
 			if *debug {
 				fmt.Printf("query result: %v\n", protoqr)
+			}
+		case "directproto":
+			pbbuf, _ := proto.Marshal(&qrpb)
+			newqrpb := querypb.QueryResult{}
+			proto.Unmarshal(pbbuf, &newqrpb)
+			if *debug {
+				fmt.Printf("query result: %v\n", newqrpb)
 			}
 		default:
 		}
