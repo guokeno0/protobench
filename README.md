@@ -46,6 +46,7 @@ jeffjiang@jeffjiang2:~/protobench$ ./bin/bench -count=1000000 -format="proto" -t
 1000000 operations cost 455841313457 ns, 455841 ns per op
 ## Test vtbuf, as a hit about how much space for improvement
 jeffjiang@jeffjiang2:~/protobench$ ./bin/bench -count=1000000 -format="vtbuf" -threads=4
+
 1000000 operations cost 145815346835 ns, 145815 ns per op
 
 1000000 operations cost 145974197197 ns, 145974 ns per op
