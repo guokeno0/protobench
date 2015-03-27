@@ -79,12 +79,13 @@ func benchmark() {
 			qrpb = querypb.QueryResult{}
 			qrpb.Rows = make([]*querypb.Row, 3, 3)
 			for i, _ := range qrpb.Rows {
-				qrpb.Rows[i] = &querypb.Row{}
+				qrpb.Rows[i] = new(querypb.Row)
 			}
 			for i := 0; i < 3; i++ {
 				for j := 0; j < 30; j++ {
-					qr.Rows[i] = append(qr.Rows[i], queryresult.MakeString([]byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")))
-					qrpb.Rows[i].Values = append(qrpb.Rows[i].Values, &querypb.Cell{Value: []byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")})
+					cell := new(querypb.Cell)
+					cell.Value = []byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")
+					qrpb.Rows[i].Values = append(qrpb.Rows[i].Values, cell)
 				}
 			}
 			qrpb.RowsAffected = proto.Uint64(3)
