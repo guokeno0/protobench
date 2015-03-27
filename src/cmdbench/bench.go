@@ -19,7 +19,7 @@ var (
 	threads    = flag.Int("threads", 1, "number of threads")
 	debug      = flag.Bool("debug", false, "debug mode")
 	count      = flag.Int("count", 100000, "total counts for serialization/deserialization")
-	format     = flag.String("format", "vtbuf", "serialization format: vtbuf, proto, directproto")
+	format     = flag.String("format", "vtbuf", "serialization format: vtbuf, proto, directproto, allocproto")
 )
 
 func benchmark() {
@@ -46,6 +46,8 @@ func benchmark() {
 	qrpb.RowsAffected = proto.Uint64(3)
 	qrpb.InsertId = proto.Uint64(101)
 	begin := time.Now()
+	var m1, m2 runtime.MemStats
+	runtime.ReadMemStats(&m1)
 	for i := 0; i < *count; i++ {
 		switch *format {
 		case "vtbuf":
@@ -73,11 +75,37 @@ func benchmark() {
 			if *debug {
 				fmt.Printf("query result: %v\n", newqrpb)
 			}
+		case "allocproto":
+			qrpb = querypb.QueryResult{}
+			qrpb.Rows = make([]*querypb.Row, 3, 3)
+			for i, _ := range qrpb.Rows {
+				qrpb.Rows[i] = &querypb.Row{}
+			}
+			for i := 0; i < 3; i++ {
+				for j := 0; j < 30; j++ {
+					qr.Rows[i] = append(qr.Rows[i], queryresult.MakeString([]byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")))
+					qrpb.Rows[i].Values = append(qrpb.Rows[i].Values, &querypb.Cell{Value: []byte("abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*")})
+				}
+			}
+			qrpb.RowsAffected = proto.Uint64(3)
+			qrpb.InsertId = proto.Uint64(101)
 		default:
 		}
 	}
+	runtime.ReadMemStats(&m2)
 	cost := time.Now().Sub(begin)
 	fmt.Printf("%d operations cost %d ns, %d ns per op\n", *count, cost.Nanoseconds(), cost.Nanoseconds()/int64(*count))
+	fmt.Printf("%d allocs allocating %d bytes, %d allocs/%d bytes per op\n",
+		m2.Mallocs-m1.Mallocs,
+		m2.TotalAlloc-m1.TotalAlloc,
+		(m2.Mallocs-m1.Mallocs)/uint64(*count),
+		(m2.TotalAlloc-m1.TotalAlloc)/uint64(*count))
+	fmt.Printf("%d heap objects allocated, %d per op\n",
+		m2.HeapObjects-m1.HeapObjects,
+		(m2.HeapObjects-m1.HeapObjects)/uint64(*count))
+	fmt.Printf("%d heap bytes allocated, %d bytes per op\n",
+		m2.HeapAlloc-m1.HeapAlloc,
+		(m2.HeapAlloc-m1.HeapAlloc)/uint64(*count))
 	benchmarks.Done()
 }
 
