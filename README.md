@@ -2,7 +2,7 @@
 # To download:
 jeffjiang@jeffjiang2:~$ git clone https://github.com/guokeno0/protobench.git
 
-#To compile:
+# To compile:
 jeffjiang@jeffjiang2:~$ cd protobench/
 
 jeffjiang@jeffjiang2:~/protobench$ make
